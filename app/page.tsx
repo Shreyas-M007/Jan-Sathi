@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Mode = "login" | "register";
 type Role = "Citizen" | "Admin";
@@ -13,6 +13,7 @@ const liveStats = [
 ];
 
 export default function AuthPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [role, setRole] = useState<Role>("Citizen");
   const [name, setName] = useState("");
@@ -27,18 +28,32 @@ export default function AuthPage() {
     return () => clearInterval(id);
   }, []);
 
-  const destination = role === "Citizen" ? "/report" : "/admin";
   const submitLabel = mode === "login" ? `Login as ${role}` : `Register as ${role}`;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    const reporterName = name || email.split("@")[0] || "Citizen";
+    const reporterId = email.toLowerCase().trim() || `citizen-${crypto.randomUUID()}`;
+
+    localStorage.setItem(
+      "jan-sathi-session",
+      JSON.stringify({
+        role,
+        email,
+        reporterName,
+        reporterId,
+        loggedIn: true
+      })
+    );
+
+    router.push(role === "Citizen" ? "/report" : "/admin");
   };
 
   return (
     <section className="mx-auto grid max-w-5xl gap-6 md:grid-cols-[1.05fr_0.95fr]">
       <div className="glass-card p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Welcome to CivicSense AI</h2>
+          <h2 className="text-2xl font-semibold">Welcome to Jan Sathi</h2>
           <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">Live {clock}</span>
         </div>
         <p className="text-sm text-slate-600">Choose your access mode, then continue as a citizen reporter or municipal admin.</p>
@@ -83,9 +98,9 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <Link href={destination} className="primary-btn block w-full text-center">
+          <button type="submit" className="primary-btn block w-full text-center">
             {submitLabel}
-          </Link>
+          </button>
         </form>
       </div>
 

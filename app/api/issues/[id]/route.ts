@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { type IssueStatus, updateIssueStatus } from "@/lib/issues";
+import { advanceIssueTimeline, listIssueClusters, type IssueStatus, updateIssueStatus, upvoteCluster } from "@/lib/issues";
 
 const validStatuses: IssueStatus[] = ["Pending", "In Progress", "Resolved"];
 
@@ -8,8 +8,24 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const payload = await request.json();
-  const status = payload.status as IssueStatus;
 
+  if (payload.action === "upvote") {
+    const updatedCluster = upvoteCluster(params.id);
+    if (!updatedCluster) {
+      return NextResponse.json({ error: "Cluster not found" }, { status: 404 });
+    }
+    return NextResponse.json({ cluster: updatedCluster, clusters: listIssueClusters() });
+  }
+
+  if (payload.action === "advanceTimeline") {
+    const advanced = advanceIssueTimeline(params.id);
+    if (!advanced) {
+      return NextResponse.json({ error: "Issue not found" }, { status: 404 });
+    }
+    return NextResponse.json({ issue: advanced });
+  }
+
+  const status = payload.status as IssueStatus;
   if (!validStatuses.includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
