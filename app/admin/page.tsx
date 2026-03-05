@@ -43,18 +43,18 @@ export default function AdminDashboard() {
 
   if (!granted) {
     return (
-      <section className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="glass-card mx-auto max-w-md p-6">
         <h2 className="text-2xl font-semibold">Admin Access</h2>
         <p className="mt-2 text-sm text-slate-600">Enter dashboard access code to continue.</p>
         <input
           value={accessCode}
           onChange={(event) => setAccessCode(event.target.value)}
           placeholder="Access code"
-          className="mt-4 w-full rounded-md border border-slate-300 px-3 py-2"
+          className="mt-4 w-full rounded-md border border-indigo-200 bg-white/90 px-3 py-2"
         />
         <button
           onClick={() => setGranted(accessCode === dashboardKey)}
-          className="mt-3 w-full rounded-md bg-slate-900 px-4 py-2 font-medium text-white"
+          className="primary-btn mt-3 w-full"
         >
           Unlock Dashboard
         </button>
@@ -72,13 +72,13 @@ export default function AdminDashboard() {
       ) : (
         <div className="mt-6 space-y-4">
           {sorted.map((issue) => (
-            <article key={issue.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article key={issue.id} className="glass-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold">{issue.title}</h3>
                   <p className="text-sm text-slate-600">{issue.locationLabel}</p>
                 </div>
-                <div className="rounded-lg bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700">Severity {issue.severity}/10</div>
+                <div className="rounded-lg bg-gradient-to-r from-rose-100 to-orange-100 px-3 py-1 text-sm font-semibold text-rose-700">Severity {issue.severity}/10</div>
               </div>
 
               <p className="mt-3 text-sm text-slate-700">{issue.description}</p>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
                     key={status}
                     onClick={() => void updateStatus(issue.id, status)}
                     className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                      status === issue.status ? "bg-slate-900 text-white" : "border border-slate-300 text-slate-700"
+                      status === issue.status ? "bg-gradient-to-r from-indigo-600 to-fuchsia-600 text-white" : "border border-indigo-200 text-indigo-700 bg-white/90"
                     }`}
                   >
                     {status}

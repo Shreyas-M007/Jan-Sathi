@@ -15,14 +15,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="border-b border-slate-200 bg-white">
+        <header className="sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-            <h1 className="text-xl font-semibold text-slate-900">CivicSense AI</h1>
-            <div className="flex gap-3 text-sm font-medium">
-              <Link className="rounded-md px-3 py-1.5 text-slate-700 hover:bg-slate-100" href="/">
-                Report Issue
+            <h1 className="bg-gradient-to-r from-indigo-700 to-fuchsia-600 bg-clip-text text-xl font-extrabold text-transparent">
+              CivicSense AI
+            </h1>
+            <div className="flex flex-wrap gap-2 text-sm font-medium">
+              <Link className="outline-btn" href="/">
+                Login / Register
               </Link>
-              <Link className="rounded-md px-3 py-1.5 text-slate-700 hover:bg-slate-100" href="/admin">
+              <Link className="outline-btn" href="/report">
+                Citizen Report
+              </Link>
+              <Link className="outline-btn" href="/admin">
                 Admin Dashboard
               </Link>
             </div>
