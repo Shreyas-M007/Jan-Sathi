@@ -66,7 +66,41 @@ const categoryRules = [
   { key: "water", category: "Water Leakage", department: "Water Board", base: 7 }
 ];
 
-function triageIssue(text: string) {
+async function triageIssue(text: string) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Analyze the following civic issue report and provide a JSON response containing strictly:
+1. "category": A concise category label (e.g., "Deep Pothole", "Broken Streetlight")
+2. "severity": An integer score from 1 to 10 based on immediate public danger
+3. "department": The relevant city department (e.g., "Road Maintenance", "Water Board")
+
+Report Text: ${text}` }] }],
+          generationConfig: { response_mime_type: "application/json" }
+        })
+      });
+
+      const data = await response.json();
+      const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (rawJson) {
+        const parsed = JSON.parse(rawJson);
+        return {
+          category: parsed.category ?? "General Civic Hazard",
+          severity: typeof parsed.severity === "number" ? parsed.severity : 5,
+          department: parsed.department ?? "City Operations"
+        };
+      }
+    } catch (error) {
+      console.error("Gemini API triage failed", error);
+    }
+  }
+
+  // Fallback if API key is missing or request fails
   const lower = text.toLowerCase();
   const match = categoryRules.find((rule) => lower.includes(rule.key));
 
@@ -176,7 +210,7 @@ export function getCitizenReportSummary(reporterId: string) {
   };
 }
 
-export function createIssue(input: {
+export async function createIssue(input: {
   title: string;
   description: string;
   imageName?: string;
@@ -186,7 +220,7 @@ export function createIssue(input: {
   reporterId?: string;
   reporterName?: string;
 }) {
-  const triage = triageIssue(`${input.title} ${input.description} ${input.imageName ?? ""}`);
+  const triage = await triageIssue(`${input.title} ${input.description} ${input.imageName ?? ""}`);
 
   const issue: CivicIssue = {
     id: crypto.randomUUID(),
@@ -222,6 +256,10 @@ export function updateIssueStatus(id: string, status: IssueStatus) {
     issue.timelineStage = "Resolved";
   } else if (status === "In Progress") {
     issue.timelineStage = "Assigned to Contractor";
+  } else if (status === "Pending") {
+    if (issue.timelineStage === "Resolved" || issue.timelineStage === "Assigned to Contractor") {
+      issue.timelineStage = "Reviewed";
+    }
   }
   return issue;
 }
@@ -245,9 +283,9 @@ export function upvoteCluster(clusterId: string) {
     return null;
   }
 
-  clusterIssues.forEach((issue) => {
-    issue.upvotes += 1;
-  });
+  // Only increment upvotes heavily for the first underlying ticket to represent the +1 cluster vote
+  // Otherwise, a cluster of N issues would gain +N votes from a single user click!
+  clusterIssues[0].upvotes += 1;
 
   return listIssueClusters().find((cluster) => cluster.clusterId === clusterId) ?? null;
 }
