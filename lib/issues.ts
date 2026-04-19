@@ -88,7 +88,8 @@ Report Text: ${text}` }] }],
       const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (rawJson) {
-        const parsed = JSON.parse(rawJson);
+        const cleaned = rawJson.replace(/```(?:json)?/gi, "").trim();
+        const parsed = JSON.parse(cleaned);
         return {
           category: parsed.category ?? "General Civic Hazard",
           severity: typeof parsed.severity === "number" ? parsed.severity : 5,
@@ -257,9 +258,7 @@ export function updateIssueStatus(id: string, status: IssueStatus) {
   } else if (status === "In Progress") {
     issue.timelineStage = "Assigned to Contractor";
   } else if (status === "Pending") {
-    if (issue.timelineStage === "Resolved" || issue.timelineStage === "Assigned to Contractor") {
-      issue.timelineStage = "Reviewed";
-    }
+    issue.timelineStage = "Submitted";
   }
   return issue;
 }
