@@ -10,7 +10,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || process.env.FIREBASE_APP_ID
 };
 
-export const isFirebaseConfigured = Boolean(firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.storageBucket);
+export const isFirebaseConfigured = process.env.ENABLE_FIREBASE_STORAGE === "true" && Boolean(firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.storageBucket);
 
 export function getFirebaseStorage() {
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
