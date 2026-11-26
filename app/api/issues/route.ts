@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createIssue, getCitizenReportSummary, getTelemetryStats, listIssueClusters, listIssues, unresolvedHotspots } from "@/lib/issues";
+import { isFirebaseConfigured, uploadImageToFirebase } from "@/lib/firebase";
 import fs from "fs/promises";
 import path from "path";
 
@@ -65,14 +66,24 @@ export async function POST(request: Request) {
 
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const safeName = `${Date.now()}-${image.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      await fs.mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, safeName);
-      await fs.writeFile(filePath, buffer);
-
-      imageUrl = `/uploads/${safeName}`;
       imageName = image.name;
+
+      if (isFirebaseConfigured) {
+        try {
+          imageUrl = await uploadImageToFirebase(buffer, image.name, image.type);
+        } catch (fbErr) {
+          console.error("Firebase upload failed, falling back to local storage:", fbErr);
+        }
+      }
+
+      if (!imageUrl) {
+        const safeName = `${Date.now()}-${image.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        const uploadDir = path.join(process.cwd(), "public", "uploads");
+        await fs.mkdir(uploadDir, { recursive: true });
+        const filePath = path.join(uploadDir, safeName);
+        await fs.writeFile(filePath, buffer);
+        imageUrl = `/uploads/${safeName}`;
+      }
     }
 
     payload = {
