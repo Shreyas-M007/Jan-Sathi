@@ -10,15 +10,16 @@ export async function PATCH(
   const payload = await request.json();
 
   if (payload.action === "upvote") {
-    const updatedCluster = upvoteCluster(params.id);
+    const updatedCluster = await upvoteCluster(params.id, payload.userId);
     if (!updatedCluster) {
       return NextResponse.json({ error: "Cluster not found" }, { status: 404 });
     }
-    return NextResponse.json({ cluster: updatedCluster, clusters: listIssueClusters() });
+    const clusters = await listIssueClusters();
+    return NextResponse.json({ cluster: updatedCluster, clusters });
   }
 
   if (payload.action === "advanceTimeline") {
-    const advanced = advanceIssueTimeline(params.id);
+    const advanced = await advanceIssueTimeline(params.id);
     if (!advanced) {
       return NextResponse.json({ error: "Issue not found" }, { status: 404 });
     }
@@ -30,7 +31,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
-  const updated = updateIssueStatus(params.id, status);
+  const updated = await updateIssueStatus(params.id, status);
 
   if (!updated) {
     return NextResponse.json({ error: "Issue not found" }, { status: 404 });

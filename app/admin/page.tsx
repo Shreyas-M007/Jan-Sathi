@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { CivicIssue, IssueCluster, IssueStatus } from "@/lib/issues";
 
 const statuses: IssueStatus[] = ["Pending", "In Progress", "Resolved"];
-const dashboardKey = "protocol-demo";
 
 type Session = {
   loggedIn: boolean;
@@ -22,8 +21,6 @@ export default function AdminDashboard() {
   const [clusters, setClusters] = useState<IssueCluster[]>([]);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accessCode, setAccessCode] = useState("");
-  const [granted, setGranted] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
   const fetchIssues = async () => {
@@ -90,31 +87,6 @@ export default function AdminDashboard() {
           <Link href="/" className="primary-btn mt-8 inline-block px-8">
             Access Portal
           </Link>
-        </section>
-      </div>
-    );
-  }
-
-  if (!granted) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center p-4">
-        <section className="glass-card mx-auto max-w-md p-8 animate-slide-up relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px]"></div>
-          <h2 className="text-2xl font-bold text-white">Grid Access Validation</h2>
-          <p className="mt-3 text-sm text-slate-400">Input your administrative cryptographic passkey to unlock the command center.</p>
-          <div className="mt-6 relative">
-            <svg className="w-5 h-5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-            <input
-              type="password"
-              value={accessCode}
-              onChange={(event) => setAccessCode(event.target.value)}
-              placeholder="Enter Access Key: protocol-demo"
-              className="input-field pl-10 h-14"
-            />
-          </div>
-          <button onClick={() => setGranted(accessCode === dashboardKey)} className="primary-btn mt-6 w-full py-3.5 text-[15px] font-bold tracking-wide">
-            INITIALIZE UPLINK
-          </button>
         </section>
       </div>
     );
@@ -239,11 +211,23 @@ export default function AdminDashboard() {
 
               return (
               <article key={issue.id} className={`rounded-xl border p-5 ${isResolved ? "bg-slate-900/40 border-slate-800" : "bg-slate-800/40 border-slate-700/60"} transition-all duration-300`}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="max-w-[70%]">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                  {issue.imageUrl && (
+                    <div className="w-full sm:w-28 h-24 rounded-lg overflow-hidden border border-slate-700/80 shrink-0 bg-slate-900">
+                      <img
+                        src={issue.imageUrl}
+                        alt={issue.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
                     <h4 className={`text-lg font-bold ${isResolved ? "text-slate-400 line-through decoration-slate-600/50" : "text-white"}`}>{issue.title}</h4>
-                    <p className={`text-sm mt-1 mb-2 ${isResolved ? "text-slate-500" : "text-slate-400"}`}>{issue.description.length > 100 ? `${issue.description.substring(0, 100)}...` : issue.description}</p>
-                    <div className="flex items-center gap-3">
+                    <p className={`text-sm mt-1 mb-2 ${isResolved ? "text-slate-500" : "text-slate-400"}`}>{issue.description.length > 120 ? `${issue.description.substring(0, 120)}...` : issue.description}</p>
+                    <div className="flex flex-wrap items-center gap-3">
                       <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold flex items-center gap-1">
                         <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                         {issue.locationLabel}
@@ -252,7 +236,7 @@ export default function AdminDashboard() {
                       <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">Reported by {issue.reporterName}</p>
                     </div>
                   </div>
-                  <div className={`rounded-lg border px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${statusColorClass} shadow-sm`}>
+                  <div className={`rounded-lg border px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${statusColorClass} shadow-sm shrink-0`}>
                     {issue.status}
                   </div>
                 </div>

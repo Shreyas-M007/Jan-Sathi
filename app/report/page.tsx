@@ -216,9 +216,27 @@ export default function ReportPage() {
             <div className="space-y-5">
               {myReports.slice(0, 5).map((report) => (
                 <article key={report.id} className="relative rounded-xl border border-slate-700/50 bg-slate-800/40 p-5 group hover:border-indigo-500/30 transition-all duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <p className="font-semibold text-slate-200">{report.title}</p>
-                    <span className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300">{new Date(report.createdAt).toLocaleDateString()}</span>
+                  <div className="flex flex-col sm:flex-row gap-3 items-start justify-between mb-4">
+                    <div className="flex gap-3 items-start flex-1 min-w-0">
+                      {report.imageUrl && (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-slate-700 shrink-0 bg-slate-900">
+                          <img
+                            src={report.imageUrl}
+                            alt={report.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-200">{report.title}</p>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{report.description}</p>
+                        <span className="text-[11px] text-slate-500 mt-1 block">{report.locationLabel}</span>
+                      </div>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 shrink-0">{new Date(report.createdAt).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="relative">
