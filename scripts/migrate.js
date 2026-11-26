@@ -1,15 +1,20 @@
 const mysql = require('mysql2/promise');
 
 async function main() {
-  const connection = await mysql.createConnection({
-    host: '127.0.0.1',
-    port: 3306,
-    user: 'jansathi_user',
-    password: 'JanSathi@2026',
-    database: 'jansathi_db'
-  });
+  const config = process.env.DATABASE_URL
+    ? { uri: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : {
+        host: process.env.MYSQL_HOST || '127.0.0.1',
+        port: Number(process.env.MYSQL_PORT) || 3306,
+        user: process.env.MYSQL_USER || 'jansathi_user',
+        password: process.env.MYSQL_PASSWORD || 'JanSathi@2026',
+        database: process.env.MYSQL_DATABASE || 'jansathi_db',
+        ssl: process.env.MYSQL_SSL === 'true' ? { rejectUnauthorized: false } : undefined
+      };
 
-  console.log('Connected to MySQL jansathi_db as jansathi_user!');
+  const connection = await mysql.createConnection(config);
+
+  console.log('Connected to MySQL successfully!');
 
   // Create Users Table
   await connection.query(`
