@@ -4,6 +4,9 @@ import { isFirebaseConfigured, uploadImageToFirebase } from "@/lib/firebase";
 import fs from "fs/promises";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type IssuePayload = {
   title?: string;
   description?: string;

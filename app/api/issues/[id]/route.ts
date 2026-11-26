@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { advanceIssueTimeline, listIssueClusters, type IssueStatus, updateIssueStatus, upvoteCluster } from "@/lib/issues";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const validStatuses: IssueStatus[] = ["Pending", "In Progress", "Resolved"];
 
 export async function PATCH(
